@@ -1,0 +1,93 @@
+﻿using AgentFrameworkCodeMode.Configuration;
+using AgentFrameworkCodeMode.Infrastructure.Sandbox;
+using AgentFrameworkCodeMode.Models;
+using AgentFrameworkCodeMode.Models.Sandbox;
+using AgentFrameworkCodeMode.Skills;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace AgentFrameworkCodeMode
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var builder = CreateHostBuilder(args);
+            var host = builder.Build();
+            host.Run();
+        }
+
+        static HostApplicationBuilder CreateHostBuilder(string[] args)
+        {
+            var builder = Host.CreateApplicationBuilder(args);
+
+            // Build configuration
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                              ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+                              ?? "Production";
+
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            // Configure logging from appsettings.json
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+            builder.Logging.AddConsole();
+            
+
+            // Bind configuration sections to POCOs
+            var sesJsSandboxConfig = new SESJSSandboxConfiguration();
+            builder.Configuration.GetSection("SESJSSandbox").Bind(sesJsSandboxConfig);
+            builder.Services.AddSingleton(sesJsSandboxConfig);
+
+            builder.Services.AddSingleton<ISandbox, SESJSSandbox>();
+
+            // Bind InferenceProviders configuration as dictionary
+            var inferenceProvidersConfig = new Dictionary<string, InferenceProviderConfiguration>();
+            builder.Configuration.GetSection("InferenceProviders").Bind(inferenceProvidersConfig);
+
+            // Bind LLMs configuration as dictionary
+            var llmsConfig = new Dictionary<string, LLMConfiguration>();
+            builder.Configuration.GetSection("LLMs").Bind(llmsConfig);
+
+            // Bind raw Agents configuration as dictionary
+            var rawAgentsConfig = new Dictionary<string, Configuration.AgentConfiguration>();
+            builder.Configuration.GetSection("Agents").Bind(rawAgentsConfig);
+
+            // Build complete agent configurations with resolved LLM and InferenceProvider data
+            var agentBuilder = new AgentConfigurationBuilder(rawAgentsConfig, llmsConfig, inferenceProvidersConfig);
+            var agentsConfig = agentBuilder.Build();
+            var agentsConfigModels = agentsConfig.ToDictionary(kvp => kvp.Key, kvp => new Models.AgentConfiguration
+            {
+                ModelTemperature = kvp.Value.ModelTemperature,
+                SystemPromptFile = kvp.Value.SystemPromptFile,
+                CostPerMillionInputTokens = kvp.Value.CostPerMillionInputTokens,
+                CostPerMillionOutputTokens = kvp.Value.CostPerMillionOutputTokens,
+                Model = kvp.Value.Model,
+                Provider = kvp.Value.Provider,
+                Endpoint = kvp.Value.Endpoint,
+                ApiKey = kvp.Value.ApiKey,
+                UseStructuredOutput = kvp.Value.UseStructuredOutput,
+                StructuredOutputFQCN = kvp.Value.StructuredOutputFQCN,
+                StructuredOutputDescription = kvp.Value.StructuredOutputDescription
+            });
+            builder.Services.AddSingleton(agentsConfigModels);
+
+            // Register SkillProvider as singleton
+            builder.Services.AddSingleton<ISkillProvider, SkillProvider>();
+
+            // Register AgentFactory as singleton
+            builder.Services.AddSingleton<IAgentFactory, AgentFactory>();
+
+            // Register MainService as singleton
+            builder.Services.AddHostedService<ConsoleMainLoopService>();
+
+            return builder;
+        }
+    }
+}
