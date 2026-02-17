@@ -7,6 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace AgentFrameworkCodeMode
 {
@@ -38,7 +43,25 @@ namespace AgentFrameworkCodeMode
             builder.Logging.ClearProviders();
             builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
             builder.Logging.AddConsole();
-            
+
+            // open telemetry
+            var enableOpenTelemetry = builder.Configuration.GetValue<bool>("EnableOpenTelemetry");
+            if (enableOpenTelemetry)
+            {
+                builder.Services.AddOpenTelemetry()
+                .WithTracing(tracing =>
+                {
+                    tracing
+                        // MUST match your agent sourceName
+                        .AddSource("Agent-*")
+
+                        .SetResourceBuilder(
+                            ResourceBuilder.CreateDefault()
+                                .AddService("MyService"))
+
+                        .AddConsoleExporter(); // 👈 prints spans to console
+                });
+            }
 
             // Bind configuration sections to POCOs
             var sesJsSandboxConfig = new SESJSSandboxConfiguration();

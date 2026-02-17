@@ -30,12 +30,16 @@ namespace AgentFrameworkCodeMode.Models
             var openAIClient = new OpenAIClient(new ApiKeyCredential(config.ApiKey ?? string.Empty), new OpenAIClientOptions
             {
                 Endpoint = new Uri(config.Endpoint)
-            }); 
+            });
 
-//#pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates.
-//            var chatClient = openAIClient.GetResponsesClient(config.Model);
-//#pragma warning restore OPENAI001
-            var chatClient = openAIClient.GetChatClient(config.Model);
+            //#pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates.
+            //            var chatClient = openAIClient.GetResponsesClient(config.Model);
+            //#pragma warning restore OPENAI001
+            var chatClient = openAIClient.GetChatClient(config.Model)
+                .AsIChatClient()
+                .AsBuilder()
+                //.UseOpenTelemetry(sourceName: "MyApplication", configure: (cfg) => cfg.EnableSensitiveData = true)
+                .Build();
 
             var chatOptions = new ChatOptions
             {
@@ -70,7 +74,12 @@ namespace AgentFrameworkCodeMode.Models
             var agent = chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                  ChatOptions = chatOptions
-            });
+            }).AsBuilder()
+            .UseOpenTelemetry(sourceName: $"Agent-{agentName}", configure: (cfg) =>
+            {
+                cfg.EnableSensitiveData = true;
+            })
+            .Build();
 
             return agent;
         }
