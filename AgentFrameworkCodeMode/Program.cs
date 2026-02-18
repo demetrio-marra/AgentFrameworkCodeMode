@@ -1,9 +1,11 @@
 ﻿using AgentFrameworkCodeMode.Configuration;
 using AgentFrameworkCodeMode.Infrastructure.Embedding;
 using AgentFrameworkCodeMode.Infrastructure.Sandbox;
+using AgentFrameworkCodeMode.Infrastructure.Skills;
 using AgentFrameworkCodeMode.Models;
 using AgentFrameworkCodeMode.Models.Embedding;
 using AgentFrameworkCodeMode.Models.Sandbox;
+using AgentFrameworkCodeMode.Models.Skills;
 using AgentFrameworkCodeMode.Skills;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,9 +68,12 @@ namespace AgentFrameworkCodeMode
             }
 
             // Bind configuration sections to POCOs
+
+            // Skills finder
             var qdrantConfiguration = new QDrantConfiguration();
             builder.Configuration.GetSection("QDrant").Bind(qdrantConfiguration);
             builder.Services.AddSingleton(qdrantConfiguration);
+            builder.Services.AddSingleton<ISkillsFinder, QDrantSkillsFinder>();
 
             // Embedding configuration and service registration
             var embeddingConfiguration = new EmbeddingConfiguration();

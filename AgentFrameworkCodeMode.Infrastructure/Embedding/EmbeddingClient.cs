@@ -40,9 +40,32 @@ namespace AgentFrameworkCodeMode.Infrastructure.Embedding
             return data!.Data[0].Embedding;
         }
 
+        public async Task<IEnumerable<float[]>> GetEmbeddingAsync(IEnumerable<string> inputs, CancellationToken cancellationToken = default)
+        {
+            var payload = new EmbeddingsPayload
+            {
+                Input = inputs,
+                Model = _configuration.ModelName
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("", payload, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var data = await response.Content.ReadFromJsonAsync<EmbeddingApiResponse>(cancellationToken: cancellationToken);
+
+            var ret = data.Data.Select(d => d.Embedding).AsEnumerable();
+            return ret;
+        }
+
         private class EmbeddingPayload
         {
             public string Input { get; set; } = string.Empty;
+            public string Model { get; set; } = string.Empty;
+        }
+
+        private class EmbeddingsPayload
+        {
+            public IEnumerable<string> Input { get; set; } = Array.Empty<string>();
             public string Model { get; set; } = string.Empty;
         }
 

@@ -1,6 +1,6 @@
-﻿namespace AgentFrameworkCodeMode.Configuration
+﻿namespace AgentFrameworkCodeMode.Infrastructure.Skills
 {
-    internal class QDrantConfiguration
+    public class QDrantConfiguration
     {
         public string Host { get; set; } = string.Empty;
         public int Port { get; set; }
