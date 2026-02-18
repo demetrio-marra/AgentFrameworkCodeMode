@@ -1,5 +1,6 @@
 ﻿using AgentFrameworkCodeMode.Models.Embedding;
 using AgentFrameworkCodeMode.Models.Skills;
+using Microsoft.Extensions.Logging;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
@@ -9,11 +10,14 @@ namespace AgentFrameworkCodeMode.Infrastructure.Skills
     {
         private readonly QdrantClient _qdrantClient;
         private readonly IEmbeddingService _embeddingService;
+        private readonly ILogger<QDrantSkillsFinder> _logger;
 
         public QDrantSkillsFinder(QDrantConfiguration configuration,
-            IEmbeddingService embeddingService)
+            IEmbeddingService embeddingService,
+            ILogger<QDrantSkillsFinder> logger)
         {
             _embeddingService = embeddingService;
+            _logger = logger;
             _qdrantClient = new QdrantClient(
                host: configuration.Host,
                https: configuration.Https,
@@ -26,6 +30,8 @@ namespace AgentFrameworkCodeMode.Infrastructure.Skills
             CancellationToken cancellationToken = default)
         {
             var results = new List<string>();
+
+            _logger.LogDebug("Fetching embeddings for actionable requirements: {0}...", string.Join(", ", actionableRequirements));
 
             var embeddings = await _embeddingService.GetEmbeddingAsync(actionableRequirements);
             var searchPoints = embeddings.Select(vec => new SearchPoints
@@ -53,11 +59,11 @@ namespace AgentFrameworkCodeMode.Infrastructure.Skills
             {
                 foreach (var result in searchResult.Result)
                 {
-                    if (result.Payload.TryGetValue("text", out var extractedText))
+                    if (result.Payload.TryGetValue("text", out var extractedValue))
                     {
                         rr.Add(new ResultWithRelevance
                         {
-                            ResultText = extractedText.ToString(),
+                            ResultText = extractedValue.StringValue,
                             Relevance = result.Score
                         });
                     }
@@ -69,6 +75,8 @@ namespace AgentFrameworkCodeMode.Infrastructure.Skills
                 .Select(r => r.ResultText)
                 .Distinct()
                 .ToList();
+
+            _logger.LogDebug("Found {0} relevant skills: {1}", results.Count, string.Join(", ", results));
 
             return results;
         }

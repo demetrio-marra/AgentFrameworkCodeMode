@@ -4,6 +4,7 @@ using AgentFrameworkCodeMode.Infrastructure.Sandbox;
 using AgentFrameworkCodeMode.Models;
 using AgentFrameworkCodeMode.Models.Inputs;
 using AgentFrameworkCodeMode.Models.Sandbox;
+using AgentFrameworkCodeMode.Models.Skills;
 using AgentFrameworkCodeMode.Models.StructuredOutputs;
 using AgentFrameworkCodeMode.Skills;
 using Microsoft.Agents.AI;
@@ -20,6 +21,7 @@ namespace AgentFrameworkCodeMode
         private readonly IAgentFactory _agentFactory;
         private readonly ILogger<ConsoleMainLoopService> _logger;
         private readonly ISkillProvider _skillProvider;
+        private readonly ISkillsFinder _skillsFinder;
         private readonly ISandbox _sandbox;
 
         public ConsoleMainLoopService(
@@ -27,12 +29,14 @@ namespace AgentFrameworkCodeMode
             IAgentFactory agentFactory,
             ILogger<ConsoleMainLoopService> logger,
             ISkillProvider skillProvider,
-            ISandbox sandbox)
+            ISandbox sandbox,
+            ISkillsFinder skillsFinder)
         {
             _lifetime = lifetime;
             _agentFactory = agentFactory ?? throw new ArgumentNullException(nameof(agentFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _skillProvider = skillProvider ?? throw new ArgumentNullException(nameof(skillProvider));
+            _skillsFinder = skillsFinder ?? throw new ArgumentNullException(nameof(skillsFinder));
             _sandbox = sandbox ?? throw new ArgumentNullException(nameof(sandbox));
         }
 
@@ -69,8 +73,8 @@ namespace AgentFrameworkCodeMode
 
             var contextAnalyzer = new ContextAnalyzerExecutor(contextAnalyzerAgent);
             var router = new RouterExecutor(routerAgent);
-            var businessAnalyst = new BusinessAnalystExecutor(businessAnalystAgent, _skillProvider);
-            var businessAdvisor = new BusinessAdvisorExecutor(businessAdvisorAgent, _skillProvider);
+            var businessAnalyst = new BusinessAnalystExecutor(businessAnalystAgent, _skillsFinder);
+            var businessAdvisor = new BusinessAdvisorExecutor(businessAdvisorAgent, _skillsFinder);
             var personalAssistant = new PersonalAssistantExecutor(personalAssistantAgent);
             var coder = new CoderExecutor(coderAgent, _skillProvider);
             var sandbox = new CodeSandboxExecutor("123", _sandbox);

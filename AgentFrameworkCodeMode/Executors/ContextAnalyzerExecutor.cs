@@ -35,6 +35,11 @@ namespace AgentFrameworkCodeMode.Executors
                     scopeName: WorkflowConstants.WORKFLOW_DEFAULT_SCOPE_KEY, 
                     cancellationToken: cancellationToken);
 
+                await context.QueueStateUpdateAsync(WorkflowConstants.WORKFLOW_CONTEXT_ACTIONABLE_REQUIREMENTS_KEY,
+                 ret.ActionableRequirements,
+                 scopeName: WorkflowConstants.WORKFLOW_DEFAULT_SCOPE_KEY,
+                 cancellationToken: cancellationToken);
+
                 return ret;
             }
             catch (Exception ex)
