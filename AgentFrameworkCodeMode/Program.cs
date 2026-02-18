@@ -1,6 +1,8 @@
 ﻿using AgentFrameworkCodeMode.Configuration;
+using AgentFrameworkCodeMode.Infrastructure.Embedding;
 using AgentFrameworkCodeMode.Infrastructure.Sandbox;
 using AgentFrameworkCodeMode.Models;
+using AgentFrameworkCodeMode.Models.Embedding;
 using AgentFrameworkCodeMode.Models.Sandbox;
 using AgentFrameworkCodeMode.Skills;
 using Microsoft.Extensions.Configuration;
@@ -68,9 +70,11 @@ namespace AgentFrameworkCodeMode
             builder.Configuration.GetSection("QDrant").Bind(qdrantConfiguration);
             builder.Services.AddSingleton(qdrantConfiguration);
 
+            // Embedding configuration and service registration
             var embeddingConfiguration = new EmbeddingConfiguration();
             builder.Configuration.GetSection("Embedding").Bind(embeddingConfiguration);
             builder.Services.AddSingleton(embeddingConfiguration);
+            builder.Services.AddSingleton<IEmbeddingService, EmbeddingClient>();
 
             var sesJsSandboxConfig = new SESJSSandboxConfiguration();
             builder.Configuration.GetSection("SESJSSandbox").Bind(sesJsSandboxConfig);

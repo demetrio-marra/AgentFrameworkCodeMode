@@ -1,6 +1,6 @@
-﻿namespace AgentFrameworkCodeMode.Configuration
+﻿namespace AgentFrameworkCodeMode.Infrastructure.Embedding
 {
-    internal class EmbeddingConfiguration
+    public class EmbeddingConfiguration
     {
         public string ModelEndpoint { get; set; } = string.Empty;
         public string ModelName { get; set; } = string.Empty;
