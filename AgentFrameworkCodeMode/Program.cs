@@ -64,6 +64,14 @@ namespace AgentFrameworkCodeMode
             }
 
             // Bind configuration sections to POCOs
+            var qdrantConfiguration = new QDrantConfiguration();
+            builder.Configuration.GetSection("QDrant").Bind(qdrantConfiguration);
+            builder.Services.AddSingleton(qdrantConfiguration);
+
+            var embeddingConfiguration = new EmbeddingConfiguration();
+            builder.Configuration.GetSection("Embedding").Bind(embeddingConfiguration);
+            builder.Services.AddSingleton(embeddingConfiguration);
+
             var sesJsSandboxConfig = new SESJSSandboxConfiguration();
             builder.Configuration.GetSection("SESJSSandbox").Bind(sesJsSandboxConfig);
             builder.Services.AddSingleton(sesJsSandboxConfig);
