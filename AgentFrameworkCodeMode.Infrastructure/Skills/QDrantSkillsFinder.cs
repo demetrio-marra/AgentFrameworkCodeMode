@@ -9,13 +9,11 @@ namespace AgentFrameworkCodeMode.Infrastructure.Skills
     {
         private readonly QdrantClient _qdrantClient;
         private readonly IEmbeddingService _embeddingService;
-        private readonly ulong _vectorSize;
 
         public QDrantSkillsFinder(QDrantConfiguration configuration,
             IEmbeddingService embeddingService)
         {
             _embeddingService = embeddingService;
-            _vectorSize = (ulong)configuration.VectorSize;
             _qdrantClient = new QdrantClient(
                host: configuration.Host,
                https: configuration.Https,
