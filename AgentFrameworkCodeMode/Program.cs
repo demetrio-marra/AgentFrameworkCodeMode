@@ -74,7 +74,7 @@ namespace AgentFrameworkCodeMode
             var embeddingConfiguration = new EmbeddingConfiguration();
             builder.Configuration.GetSection("Embedding").Bind(embeddingConfiguration);
             builder.Services.AddSingleton(embeddingConfiguration);
-            builder.Services.AddSingleton<IEmbeddingService, EmbeddingClient>();
+            builder.Services.AddHttpClient<IEmbeddingService, EmbeddingClient>();
 
             var sesJsSandboxConfig = new SESJSSandboxConfiguration();
             builder.Configuration.GetSection("SESJSSandbox").Bind(sesJsSandboxConfig);
