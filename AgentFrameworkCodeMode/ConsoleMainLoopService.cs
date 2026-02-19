@@ -46,6 +46,15 @@ namespace AgentFrameworkCodeMode
 
         private async Task MainLoop(CancellationToken stoppingToken)
         {
+            Console.WriteLine("Welcome to the Agent Framework Console!");
+            Console.Write("Enter your user id and press ENTER: ");
+            var userId = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                Console.WriteLine("Invalid user id. Exiting.");
+                return;
+            }
+
             AIAgent contextAnalyzerAgent;
             AIAgent routerAgent;
             AIAgent businessAdvisorAgent;
@@ -74,7 +83,7 @@ namespace AgentFrameworkCodeMode
             var businessAdvisor = new BusinessAdvisorExecutor(businessAdvisorAgent, _skillsFinder);
             var personalAssistant = new PersonalAssistantExecutor(personalAssistantAgent);
             var coder = new CoderExecutor(coderAgent, _sandboxDocumentationProvider);
-            var sandbox = new CodeSandboxExecutor("123", _sandbox);
+            var sandbox = new CodeSandboxExecutor(userId, _sandbox);
 
             WorkflowBuilder wfb = new WorkflowBuilder(contextAnalyzer);
             wfb.AddEdge(contextAnalyzer, router);
@@ -92,6 +101,7 @@ namespace AgentFrameworkCodeMode
             wfb.WithOutputFrom(personalAssistant);
 
             var currentChatHistory = new List<Microsoft.Extensions.AI.ChatMessage>();
+
 
             while (!stoppingToken.IsCancellationRequested)
             {
