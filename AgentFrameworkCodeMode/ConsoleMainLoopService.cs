@@ -1,12 +1,9 @@
-﻿using AgentFrameworkCodeMode.Configuration;
-using AgentFrameworkCodeMode.Executors;
-using AgentFrameworkCodeMode.Infrastructure.Sandbox;
+﻿using AgentFrameworkCodeMode.Executors;
 using AgentFrameworkCodeMode.Models;
 using AgentFrameworkCodeMode.Models.Inputs;
 using AgentFrameworkCodeMode.Models.Sandbox;
 using AgentFrameworkCodeMode.Models.Skills;
 using AgentFrameworkCodeMode.Models.StructuredOutputs;
-using AgentFrameworkCodeMode.Skills;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Hosting;
@@ -20,7 +17,7 @@ namespace AgentFrameworkCodeMode
         private readonly IHostApplicationLifetime _lifetime;
         private readonly IAgentFactory _agentFactory;
         private readonly ILogger<ConsoleMainLoopService> _logger;
-        private readonly ISkillProvider _skillProvider;
+        private readonly ISandboxDocumentationProvider _sandboxDocumentationProvider;
         private readonly ISkillsFinder _skillsFinder;
         private readonly ISandbox _sandbox;
 
@@ -28,14 +25,14 @@ namespace AgentFrameworkCodeMode
             IHostApplicationLifetime lifetime,
             IAgentFactory agentFactory,
             ILogger<ConsoleMainLoopService> logger,
-            ISkillProvider skillProvider,
+            ISandboxDocumentationProvider sandboxDocumentationProvider,
             ISandbox sandbox,
             ISkillsFinder skillsFinder)
         {
             _lifetime = lifetime;
             _agentFactory = agentFactory ?? throw new ArgumentNullException(nameof(agentFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _skillProvider = skillProvider ?? throw new ArgumentNullException(nameof(skillProvider));
+            _sandboxDocumentationProvider = sandboxDocumentationProvider ?? throw new ArgumentNullException(nameof(sandboxDocumentationProvider));
             _skillsFinder = skillsFinder ?? throw new ArgumentNullException(nameof(skillsFinder));
             _sandbox = sandbox ?? throw new ArgumentNullException(nameof(sandbox));
         }
@@ -76,7 +73,7 @@ namespace AgentFrameworkCodeMode
             var businessAnalyst = new BusinessAnalystExecutor(businessAnalystAgent, _skillsFinder);
             var businessAdvisor = new BusinessAdvisorExecutor(businessAdvisorAgent, _skillsFinder);
             var personalAssistant = new PersonalAssistantExecutor(personalAssistantAgent);
-            var coder = new CoderExecutor(coderAgent, _skillProvider);
+            var coder = new CoderExecutor(coderAgent, _sandboxDocumentationProvider);
             var sandbox = new CodeSandboxExecutor("123", _sandbox);
 
             WorkflowBuilder wfb = new WorkflowBuilder(contextAnalyzer);
@@ -138,7 +135,7 @@ namespace AgentFrameworkCodeMode
                                     break;
 
                                 case AgentResponseUpdateEvent updateEvent:
-                                    Console.WriteLine($"\n[Agent Response Update: {updateEvent.ExecutorId}] {JsonSerializer.Serialize(updateEvent.Data)}");
+                                    //Console.WriteLine($"\n[Agent Response Update: {updateEvent.ExecutorId}] {JsonSerializer.Serialize(updateEvent.Data)}");
                                     break;
 
                                 case ExecutorCompletedEvent complete:
@@ -146,12 +143,15 @@ namespace AgentFrameworkCodeMode
                                     break;
 
                                 case WorkflowOutputEvent output:
-                                    Console.WriteLine($"\n[Workflow Complete] Data: {JsonSerializer.Serialize(output.Data)}");
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine($"\n[Workflow Complete] Data:\n{output.Data}");
+                                    Console.ResetColor();
                                     break;
 
                                 case WorkflowErrorEvent error:
+                                    Console.ForegroundColor = ConsoleColor.Red;
                                     Console.WriteLine($"\n[Error] {error.Exception?.Message ?? "Unknown error"}");
-                                    _logger.LogError(error.Exception, "Workflow error");
+                                    Console.ResetColor();
                                     break;
                             }
                         }

@@ -1,0 +1,36 @@
+/**
+ * MCP Tool Error Response
+ * Returned when a tool call fails
+ */
+interface MCPToolError {
+  isError: true;
+  error: string;
+}
+
+/**
+ * MCP Tool Success Response
+ * Returns the deserialized structured content from the MCP response
+ */
+type MCPToolSuccess<T> = T;
+
+/**
+ * Combined response type for MCP tool calls
+ */
+type MCPToolResponse<T> = MCPToolSuccess<T> | MCPToolError;
+
+interface MyPlatformCompanyInfoGetAllProductNamesParams {
+
+}
+
+interface MyPlatformCompanyInfoGetAllProductNamesResult {
+  result: string[];
+}
+
+/**
+ * @tool MyPlatform_CompanyInfo_GetAllProductNames
+ * @description CompanyInfo - Retrieves all available product names.
+ * @inputSchema MyPlatformCompanyInfoGetAllProductNamesParams
+ * @outputSchema MCPToolResponse<MyPlatformCompanyInfoGetAllProductNamesResult>
+ * @errorSchema MCPToolError
+ */
+declare function MyPlatform_CompanyInfo_GetAllProductNames(params: MyPlatformCompanyInfoGetAllProductNamesParams): Promise<MCPToolResponse<MyPlatformCompanyInfoGetAllProductNamesResult>>;

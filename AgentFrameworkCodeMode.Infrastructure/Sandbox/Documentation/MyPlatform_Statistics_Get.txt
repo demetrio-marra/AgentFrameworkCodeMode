@@ -1,0 +1,57 @@
+/**
+ * MCP Tool Error Response
+ * Returned when a tool call fails
+ */
+interface MCPToolError {
+  isError: true;
+  error: string;
+}
+
+/**
+ * MCP Tool Success Response
+ * Returns the deserialized structured content from the MCP response
+ */
+type MCPToolSuccess<T> = T;
+
+/**
+ * Combined response type for MCP tool calls
+ */
+type MCPToolResponse<T> = MCPToolSuccess<T> | MCPToolError;
+
+interface MyPlatformStatisticsGetParams {
+  /** Start date filter for the search range (inclusive), in ISO8601 format without a time component (e.g., "2025-10-20") */
+  queryDateFrom: string;
+  /** End date filter for the search range (inclusive), in ISO8601 format without a time component (e.g., "2025-12-20") */
+  queryDateTo: string;
+  /** Product's name filter */
+  product: 'FiberInternet1Gbps' | 'BusinessEthernet' | 'VirtualPrivateServer' | 'DedicatedBareMetalServer' | 'ObjectStorage' | 'BackupAsAService' | 'ManagedFirewall' | 'LoadBalancerAsAService';
+  /** Group data by time period */
+  dataPartitioning: 'Year' | 'Month' | 'Day';
+  /** Product lifecycle phase filter */
+  provisioningPhase?: 'FirstActivation' | 'Renew' | 'Deactivation' | 'Expiration' | null;
+  /** Name of the company filter */
+  company?: 'NetWave' | 'SkyLink' | null;
+  /** Product's family name filter */
+  family?: 'Connectivity' | 'CloudCompute' | 'CloudStorage' | 'NetworkServices' | null;
+}
+
+interface MyPlatformStatisticsGetResult {
+  result: {
+  resultDateFrom?: string;
+  resultDateTo?: string;
+  provisioningPhase?: string;
+  ok?: number | null;
+  ko?: number | null;
+  cumulativeKo?: number | null;
+  total?: number | null;
+}[];
+}
+
+/**
+ * @tool MyPlatform_Statistics_Get
+ * @description Get provisioning processes statistics for a specific product using Company, Family, Product and ProvisioningPhase filters. Supports data partitioning.
+ * @inputSchema MyPlatformStatisticsGetParams
+ * @outputSchema MCPToolResponse<MyPlatformStatisticsGetResult>
+ * @errorSchema MCPToolError
+ */
+declare function MyPlatform_Statistics_Get(params: MyPlatformStatisticsGetParams): Promise<MCPToolResponse<MyPlatformStatisticsGetResult>>;

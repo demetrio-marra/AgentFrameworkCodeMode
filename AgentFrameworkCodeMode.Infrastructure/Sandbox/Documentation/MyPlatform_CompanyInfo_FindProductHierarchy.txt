@@ -1,0 +1,41 @@
+/**
+ * MCP Tool Error Response
+ * Returned when a tool call fails
+ */
+interface MCPToolError {
+  isError: true;
+  error: string;
+}
+
+/**
+ * MCP Tool Success Response
+ * Returns the deserialized structured content from the MCP response
+ */
+type MCPToolSuccess<T> = T;
+
+/**
+ * Combined response type for MCP tool calls
+ */
+type MCPToolResponse<T> = MCPToolSuccess<T> | MCPToolError;
+
+interface MyPlatformCompanyInfoFindProductHierarchyParams {
+  /** Product name */
+  product: 'FiberInternet1Gbps' | 'BusinessEthernet' | 'VirtualPrivateServer' | 'DedicatedBareMetalServer' | 'ObjectStorage' | 'BackupAsAService' | 'ManagedFirewall' | 'LoadBalancerAsAService';
+}
+
+interface MyPlatformCompanyInfoFindProductHierarchyResult {
+  result: {
+  company?: string | null;
+  family?: string | null;
+  product?: string | null;
+}[];
+}
+
+/**
+ * @tool MyPlatform_CompanyInfo_FindProductHierarchy
+ * @description CompanyInfo - Finds which Company and Family a specific Product belongs to.
+ * @inputSchema MyPlatformCompanyInfoFindProductHierarchyParams
+ * @outputSchema MCPToolResponse<MyPlatformCompanyInfoFindProductHierarchyResult>
+ * @errorSchema MCPToolError
+ */
+declare function MyPlatform_CompanyInfo_FindProductHierarchy(params: MyPlatformCompanyInfoFindProductHierarchyParams): Promise<MCPToolResponse<MyPlatformCompanyInfoFindProductHierarchyResult>>;

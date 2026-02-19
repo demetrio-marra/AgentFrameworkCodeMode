@@ -18,17 +18,19 @@ namespace AgentFrameworkCodeMode.Executors
         public override async ValueTask<RouterAgentOutput> HandleAsync(ContextAnalyzerAgentOutput contextAnalyzerOutput, IWorkflowContext context, CancellationToken cancellationToken = default)
         {
             var originalRequestByUser = await context.ReadStateAsync<string>(WorkflowConstants.WORKFLOW_ORIGINAL_REQUEST_BY_USER_KEY, scopeName: WorkflowConstants.WORKFLOW_DEFAULT_SCOPE_KEY, cancellationToken: cancellationToken);
-            
+
             // Construct the messages for the agent
             var messages = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.User, $"The user has the following request: {originalRequestByUser}"),
+                new ChatMessage(ChatRole.System, $"Today date is {DateTime.UtcNow:d}"),
             };
 
             if (contextAnalyzerOutput.KeyFacts.Any())
             {
-                messages.Add(new ChatMessage(ChatRole.User, $"The context analyzer agent has extracted the following key facts: {string.Join(", ", contextAnalyzerOutput.KeyFacts)}."));
+                messages.Add(new ChatMessage(ChatRole.System, $"The context analyzer agent has extracted the following key facts: {string.Join(", ", contextAnalyzerOutput.KeyFacts)}."));
             }
+
+            messages.Add(new ChatMessage(ChatRole.User, $"The user has the following request: {originalRequestByUser}"));
 
             // Invoke the agent
             var response = await this._agent.RunAsync(messages, cancellationToken: cancellationToken);

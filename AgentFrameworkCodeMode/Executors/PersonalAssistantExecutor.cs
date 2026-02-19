@@ -1,4 +1,3 @@
-using AgentFrameworkCodeMode.Models.Inputs;
 using AgentFrameworkCodeMode.Models.StructuredOutputs;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
@@ -22,13 +21,15 @@ namespace AgentFrameworkCodeMode.Executors
             // Construct the messages for the agent
             var messages = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.User, string.Format(USER_REQUEST_TEMPLATE, originalRequestByUser)),
+                new ChatMessage(ChatRole.System, $"Today date is {DateTime.UtcNow:d}"),
             };
 
             if (keyFacts.Any())
             {
-                messages.Add(new ChatMessage(ChatRole.User, string.Format(KEY_FACTS_TEMPLATE, string.Join(", ", keyFacts))));
+                messages.Add(new ChatMessage(ChatRole.System, string.Format(KEY_FACTS_TEMPLATE, string.Join(", ", keyFacts))));
             }
+
+            messages.Add(new ChatMessage(ChatRole.User, string.Format(USER_REQUEST_TEMPLATE, originalRequestByUser)));
 
             // Invoke the agent
             var response = await this._agent.RunAsync(messages, cancellationToken: cancellationToken);

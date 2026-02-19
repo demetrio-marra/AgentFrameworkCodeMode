@@ -11,6 +11,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Sandbox\Documentation\MyPlatform_Chart_GenerateChart.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Sandbox\Documentation\MyPlatform_CompanyInfo_GetAllProductNames.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Sandbox\Documentation\MyPlatform_CompanyInfo_FindProductHierarchy.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Sandbox\Documentation\MyPlatform_Statistics_Get.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Sandbox\mcp-tools-impl.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

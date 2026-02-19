@@ -6,13 +6,10 @@ using AgentFrameworkCodeMode.Models;
 using AgentFrameworkCodeMode.Models.Embedding;
 using AgentFrameworkCodeMode.Models.Sandbox;
 using AgentFrameworkCodeMode.Models.Skills;
-using AgentFrameworkCodeMode.Skills;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -75,6 +72,9 @@ namespace AgentFrameworkCodeMode
             builder.Services.AddSingleton(qdrantConfiguration);
             builder.Services.AddSingleton<ISkillsFinder, QDrantSkillsFinder>();
 
+            // SES Sandbox documentation provider
+            builder.Services.AddSingleton<ISandboxDocumentationProvider, SESJSSandboxDocumentationProvider>();
+
             // Embedding configuration and service registration
             var embeddingConfiguration = new EmbeddingConfiguration();
             builder.Configuration.GetSection("Embedding").Bind(embeddingConfiguration);
@@ -117,9 +117,6 @@ namespace AgentFrameworkCodeMode
                 StructuredOutputDescription = kvp.Value.StructuredOutputDescription
             });
             builder.Services.AddSingleton(agentsConfigModels);
-
-            // Register SkillProvider as singleton
-            builder.Services.AddSingleton<ISkillProvider, SkillProvider>();
 
             // Register AgentFactory as singleton
             builder.Services.AddSingleton<IAgentFactory, AgentFactory>();
