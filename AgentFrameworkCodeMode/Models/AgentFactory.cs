@@ -38,7 +38,7 @@ namespace AgentFrameworkCodeMode.Models
             var chatClient = openAIClient.GetChatClient(config.Model)
                 .AsIChatClient()
                 .AsBuilder()
-                //.UseOpenTelemetry(sourceName: "MyApplication", configure: (cfg) => cfg.EnableSensitiveData = true)
+                .UseOpenTelemetry(sourceName: $"Agent-{agentName}", configure: (cfg) => cfg.EnableSensitiveData = true)
                 .Build();
 
             var chatOptions = new ChatOptions
@@ -75,10 +75,10 @@ namespace AgentFrameworkCodeMode.Models
             {
                  ChatOptions = chatOptions
             }).AsBuilder()
-            .UseOpenTelemetry(sourceName: $"Agent-{agentName}", configure: (cfg) =>
-            {
-                cfg.EnableSensitiveData = true;
-            })
+            //.UseOpenTelemetry(sourceName: $"Agent-{agentName}", configure: (cfg) =>
+            //{
+            //    cfg.EnableSensitiveData = true;
+            //})
             .Build();
 
             return agent;
